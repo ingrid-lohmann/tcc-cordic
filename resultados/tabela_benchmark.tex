@@ -1,0 +1,16 @@
+\begin{table}
+\caption{Comparativo de latência de execução: CORDIC vs math.h}
+\label{tab:benchmark}
+\begin{tabular}{lllll}
+\toprule
+Operação & Tempo Total (s) & Latência (ns/op) & Ciclos Médios & Slowdown \\
+\midrule
+CORDIC_sin_cos & 0.1904 & 190.41 & 494.3 & 41.66x \\
+math_sin_cos & 0.0046 & 4.57 & 11.9 & 1.00x (ref) \\
+CORDIC_sinh_cosh & 0.2154 & 215.37 & 559.1 & 51.12x \\
+math_sinh_cosh & 0.0042 & 4.21 & 10.9 & 1.00x (ref) \\
+CORDIC_sqrt & 0.1886 & 188.62 & 489.7 & 44.61x \\
+math_sqrt & 0.0042 & 4.23 & 11.0 & 1.00x (ref) \\
+\bottomrule
+\end{tabular}
+\end{table}
