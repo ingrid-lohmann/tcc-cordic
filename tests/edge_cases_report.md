@@ -1,0 +1,26 @@
+# Relatório de Casos de Borda e Conformidade IEEE 754
+
+| Categoria | Teste / Entrada | Obtido | Esperado | Diferença Abs. | Status |
+| :--- | :--- | :--- | :--- | :---: | :---: |
+| Zero/Identidade | `cordic_circular_sin(0.0)` | -0.000000071 | 0.000000000 | 7.11e-08 | **PASS** |
+| Zero/Identidade | `cordic_circular_cos(0.0)` | 1.000000000 | 1.000000000 | 2.22e-15 | **PASS** |
+| Zero/Identidade | `cordic_circular_tan(0.0)` | -0.000000071 | 0.000000000 | 7.11e-08 | **PASS** |
+| Zero/Identidade | `cordic_hyperbolic_sinh(0.0)` | -0.000000012 | 0.000000000 | 1.16e-08 | **PASS** |
+| Zero/Identidade | `cordic_hyperbolic_cosh(0.0)` | 1.000000000 | 1.000000000 | 0.00e+00 | **PASS** |
+| Zero/Identidade | `cordic_exp(0.0)` | 1.000000000 | 1.000000000 | 0.00e+00 | **PASS** |
+| Zero/Identidade | `cordic_ln(1.0)` | 0.000000000 | 0.000000000 | 0.00e+00 | **PASS** |
+| Zero/Identidade | `cordic_sqrt(0.0)` | 0.000000000 | 0.000000000 | 0.00e+00 | **PASS** |
+| Dominio Invalido | `cordic_sqrt(-1.0)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Dominio Invalido | `cordic_sqrt(-100.0)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Dominio Invalido | `cordic_ln(-2.0)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Dominio Invalido | `cordic_ln(0.0)` | -Inf | -Infinity | 0.00e+00 | **PASS** |
+| Entrada Especial | `cordic_circular_sin(NAN)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Entrada Especial | `cordic_circular_cos(NAN)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Entrada Especial | `cordic_sqrt(NAN)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Entrada Especial | `cordic_ln(NAN)` | NaN | NaN | 0.00e+00 | **PASS** |
+| Simetria/Quadrante | `cordic_circular_sin(-pi/4)` | -0.707106719 | -0.707106781 | 6.22e-08 | **PASS** |
+| Simetria/Quadrante | `cordic_circular_cos(-pi/4)` | 0.707106843 | 0.707106781 | 6.22e-08 | **PASS** |
+| Simetria/Quadrante | `cordic_circular_sin(3*pi)` | 0.000000071 | 0.000000000 | 7.11e-08 | **PASS** |
+| Simetria/Quadrante | `cordic_circular_cos(3*pi)` | -1.000000000 | -1.000000000 | 2.22e-15 | **PASS** |
+
+**Resumo**: 20/20 testes passaram (taxa de sucesso: 100.0%).
