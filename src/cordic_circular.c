@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <math.h>
 #include "cordic_circular.h"
+#include "ieee_utils.h"
 
 /* Motor 1: Modo de Rotação (força z -> 0) */
 CordicVector cordic_circular_rotate(CordicVector v, int iterations) {
@@ -76,10 +77,7 @@ void cordic_circular_sin_cos(double angle_rad, double *sin_out, double *cos_out,
 /* Tangente: sin(x) / cos(x) */
 double cordic_circular_tan(double angle_rad, int iterations) {
     /* Tratamento de valores excepcionais segundo IEEE 754 */
-    if (isnan(angle_rad)) {
-        return NAN;
-    }
-    if (isinf(angle_rad)) {
+    if (isnan(angle_rad) || isinf(angle_rad)) {
         return NAN;
     }
 
@@ -91,18 +89,18 @@ double cordic_circular_tan(double angle_rad, int iterations) {
     }
 
     /* Redução periódica ao intervalo [0, pi) */
-    while (angle_rad >= M_PI) {
-        angle_rad -= M_PI;
+    while (angle_rad >= PI) {
+        angle_rad -= PI;
     }
 
     /* Se o ângulo cair no segundo quadrante, aplica tan(pi - x) = -tan(x) */
-    if (angle_rad > M_PI_2) {
-        angle_rad = M_PI - angle_rad;
+    if (angle_rad > PI_2) {
+        angle_rad = PI - angle_rad;
         sign = -sign;
     }
 
     /* Verificação de singularidade assintótica em pi/2 */
-    if (fabs(angle_rad - M_PI_2) < 1e-15) {
+    if (fabs(angle_rad - PI_2) < 1e-15) {
         return (sign > 0.0) ? INFINITY : -INFINITY;
     }
 
@@ -113,8 +111,8 @@ double cordic_circular_tan(double angle_rad, int iterations) {
      * Se theta > pi/4, avalia-se alpha = (pi/2 - theta) no primeiro octante [0, pi/4]
      * e aplica-se a identidade da cotangente: tan(theta) = cot(alpha) = cos(alpha) / sin(alpha).
      */
-    if (angle_rad > (M_PI / 4.0)) {
-        double alpha = M_PI_2 - angle_rad;
+    if (angle_rad > PI_4) {
+        double alpha = PI_2 - angle_rad;
         cordic_circular_sin_cos(alpha, &s, &c, iterations);
 
         if (fabs(s) < 1e-15) {
