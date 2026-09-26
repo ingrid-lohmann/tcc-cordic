@@ -1,0 +1,7 @@
+Operation,Total_Time_s,Latency_ns_op,Cycles_op,Slowdown_vs_math
+CORDIC_sin_cos,0.190411,190.41,494.34,41.66
+math_sin_cos,0.004571,4.57,11.87,1.00
+CORDIC_sinh_cosh,0.215369,215.37,559.13,51.12
+math_sinh_cosh,0.004213,4.21,10.94,1.00
+CORDIC_sqrt,0.188623,188.62,489.69,44.61
+math_sqrt,0.004228,4.23,10.98,1.00
