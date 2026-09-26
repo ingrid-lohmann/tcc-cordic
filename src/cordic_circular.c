@@ -75,14 +75,63 @@ void cordic_circular_sin_cos(double angle_rad, double *sin_out, double *cos_out,
 
 /* Tangente: sin(x) / cos(x) */
 double cordic_circular_tan(double angle_rad, int iterations) {
+    /* Tratamento de valores excepcionais segundo IEEE 754 */
+    if (isnan(angle_rad)) {
+        return NAN;
+    }
+    if (isinf(angle_rad)) {
+        return NAN;
+    }
+
+    /* Redução por simetria ímpar: tan(-x) = -tan(x) */
+    double sign = 1.0;
+    if (angle_rad < 0.0) {
+        sign = -1.0;
+        angle_rad = -angle_rad;
+    }
+
+    /* Redução periódica ao intervalo [0, pi) */
+    while (angle_rad >= M_PI) {
+        angle_rad -= M_PI;
+    }
+
+    /* Se o ângulo cair no segundo quadrante, aplica tan(pi - x) = -tan(x) */
+    if (angle_rad > M_PI_2) {
+        angle_rad = M_PI - angle_rad;
+        sign = -sign;
+    }
+
+    /* Verificação de singularidade assintótica em pi/2 */
+    if (fabs(angle_rad - M_PI_2) < 1e-15) {
+        return (sign > 0.0) ? INFINITY : -INFINITY;
+    }
+
     double s, c;
+
+    /*
+     * Divisão por octantes (Cody & Waite / FDLIBM):
+     * Se theta > pi/4, avalia-se alpha = (pi/2 - theta) no primeiro octante [0, pi/4]
+     * e aplica-se a identidade da cotangente: tan(theta) = cot(alpha) = cos(alpha) / sin(alpha).
+     */
+    if (angle_rad > (M_PI / 4.0)) {
+        double alpha = M_PI_2 - angle_rad;
+        cordic_circular_sin_cos(alpha, &s, &c, iterations);
+
+        if (fabs(s) < 1e-15) {
+            return (sign > 0.0) ? INFINITY : -INFINITY;
+        }
+
+        return sign * (c / s);
+    }
+
+    /* Avaliação direta para theta em [0, pi/4] */
     cordic_circular_sin_cos(angle_rad, &s, &c, iterations);
 
     if (fabs(c) < 1e-15) {
-        return (s >= 0.0) ? INFINITY : -INFINITY;
+        return (sign > 0.0) ? INFINITY : -INFINITY;
     }
 
-    return s / c;
+    return sign * (s / c);
 }
 
 /* Arco-tangente via Vetorização: atan(a) */
