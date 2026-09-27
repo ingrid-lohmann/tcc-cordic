@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
+#include "ieee_utils.h"
 #include "cordic_circular.h"
 #include "cordic_hyperbolic.h"
 #include "cordic_transcendental.h"
@@ -102,13 +103,13 @@ int main(void) {
     assert_isnan("Entrada Especial", "cordic_ln(NAN)", cordic_ln(NAN, TEST_ITERATIONS));
 
     printf("\n4. SIMETRIAS E ÂNGULOS FORA DO 1o QUADRANTE:\n");
-    cordic_circular_sin_cos(-M_PI / 4.0, &s, &c, TEST_ITERATIONS);
-    assert_close("Simetria/Quadrante", "cordic_circular_sin(-pi/4)", s, -sin(M_PI / 4.0), EPSILON);
-    assert_close("Simetria/Quadrante", "cordic_circular_cos(-pi/4)", c, cos(M_PI / 4.0), EPSILON);
+    cordic_circular_sin_cos(-PI / 4.0, &s, &c, TEST_ITERATIONS);
+    assert_close("Simetria/Quadrante", "cordic_circular_sin(-pi/4)", s, -sin(PI / 4.0), EPSILON);
+    assert_close("Simetria/Quadrante", "cordic_circular_cos(-pi/4)", c, cos(PI / 4.0), EPSILON);
 
-    cordic_circular_sin_cos(3.0 * M_PI, &s, &c, TEST_ITERATIONS);
-    assert_close("Simetria/Quadrante", "cordic_circular_sin(3*pi)", s, sin(3.0 * M_PI), EPSILON);
-    assert_close("Simetria/Quadrante", "cordic_circular_cos(3*pi)", c, cos(3.0 * M_PI), EPSILON);
+    cordic_circular_sin_cos(3.0 * PI, &s, &c, TEST_ITERATIONS);
+    assert_close("Simetria/Quadrante", "cordic_circular_sin(3*pi)", s, sin(3.0 * PI), EPSILON);
+    assert_close("Simetria/Quadrante", "cordic_circular_cos(3*pi)", c, cos(3.0 * PI), EPSILON);
 
     printf("\n=================================================================\n");
     printf("RESUMO: %d/%d testes passaram (%.1f%%)\n", 

@@ -3,10 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
+#include "ieee_utils.h"
 #include "cordic_circular.h"
 #include "cordic_hyperbolic.h"
 #include "cordic_transcendental.h"
@@ -27,7 +24,7 @@ int main(void) {
 
     /* 1. Modulo Circular (Trigonometricas) */
     printf("--- [1] Funcoes Circulares (Trigonometricas) ---\n");
-    double angles[] = {0.0, M_PI / 6.0, M_PI / 4.0, M_PI / 3.0};
+    double angles[] = {0.0, PI / 6.0, PI / 4.0, PI / 3.0};
     int num_angles = sizeof(angles) / sizeof(angles[0]);
 
     for (int i = 0; i < num_angles; i++) {

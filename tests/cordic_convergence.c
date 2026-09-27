@@ -3,16 +3,13 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
+#include "ieee_utils.h"
 #include "cordic_circular.h"
 #include "cordic_hyperbolic.h"
 #include "cordic_transcendental.h"
 
 int main(void) {
-    const char *filename = "cordic_convergence_data.csv";
+    const char *filename = "tests/cordic_convergence_data.csv";
     FILE *fp = fopen(filename, "w");
 
     if (fp == NULL) {
@@ -24,7 +21,7 @@ int main(void) {
     fprintf(fp, "N,Theoretical_Bound,Err_Sin_PI_4,Err_Cos_PI_4,Err_Sinh_0_5,Err_Cosh_0_5,Err_Exp_1_0,Err_Ln_2_0,Err_Sqrt_2_0\n");
 
     /* Pontos de teste fixos para analise de convergencia */
-    double theta = M_PI / 4.0; /* 45 graus para seno e cosseno */
+    double theta = PI / 4.0; /* 45 graus para seno e cosseno */
     double u = 0.5;            /* argumento para sinh e cosh */
     double x_exp = 1.0;        /* argumento para exp */
     double x_ln = 2.0;         /* argumento para ln */

@@ -26,14 +26,13 @@ CordicVector cordic_circular_rotate(CordicVector v, int iterations) {
 }
 
 /*
- * Na vetorizacao circular, o vetor (x, y) e girado ate que y se aproxime de
- * zero. O sinal de y define o sentido de cada rotacao, enquanto o angulo
- * escolhido e somado ao acumulador z.
+ * A vetorizacao circular gira o vetor (x, y) ate que y se aproxime de zero.
+ * O sinal de y determina o sentido da proxima rotacao, e o angulo aplicado e
+ * acumulado em z. Ao final, z converge para z_0 + arctan(y_0 / x_0), enquanto
+ * x representa (1/K) * sqrt(x_0^2 + y_0^2).
  *
- * Ao final, y tende a zero, z assume o valor z_0 + arctan(y_0 / x_0) e x
- * corresponde a (1/K) * sqrt(x_0^2 + y_0^2). Para calcular arctan(a), o
- * vetor inicial e definido por x = 1, y = a e z = 0. Nesse caso, o valor
- * acumulado em z converge para arctan(a).
+ * Para calcular arctan(a), inicia-se com x = 1, y = a e z = 0. O angulo
+ * acumulado em z converge entao para arctan(a).
  */
 CordicVector cordic_circular_vector(CordicVector v, int iterations) {
     for (int i = 0; i < iterations; i++) {
@@ -59,6 +58,34 @@ CordicVector cordic_circular_vector(CordicVector v, int iterations) {
 
 /* Seno e Cosseno simultâneos via Rotação */
 void cordic_circular_sin_cos(double angle_rad, double *sin_out, double *cos_out, int iterations) {
+    if (!sin_out && !cos_out) return;
+
+    // 1. Tratamento de NaN e Infinito (IEEE 754)
+    if (isnan(angle_rad) || isinf(angle_rad)) {
+        if (cos_out != NULL) *cos_out = NAN;
+        if (sin_out != NULL) *sin_out = NAN;
+        return;
+    }
+
+    // 2. Redução periódica para o intervalo [-PI, PI]
+    angle_rad = fmod(angle_rad, TWO_PI);
+    if (angle_rad > PI) {
+        angle_rad -= TWO_PI;
+    } else if (angle_rad < -PI) {
+        angle_rad += TWO_PI;
+    }
+
+    // 3. Mapeamento para [-PI_2, PI_2] com inversão de sinal (2º e 3º quadrantes)
+    double sign = 1.0;
+    if (angle_rad > PI_2) {
+        angle_rad -= PI;
+        sign = -1.0;
+    } else if (angle_rad < -PI_2) {
+        angle_rad += PI;
+        sign = -1.0;
+    }
+
+    // 4. Execução do CORDIC com ângulo garantidamente em [-PI/2, PI/2]
     CordicVector v;
     v.x.x = CORDIC_K_CIRCULAR;
     v.y.x = 0.0;
@@ -66,11 +93,12 @@ void cordic_circular_sin_cos(double angle_rad, double *sin_out, double *cos_out,
 
     CordicVector result = cordic_circular_rotate(v, iterations);
 
+    // 5. Aplicação do sinal referente ao quadrante original
     if (cos_out != NULL) {
-        *cos_out = result.x.x;
+        *cos_out = sign * result.x.x;
     }
     if (sin_out != NULL) {
-        *sin_out = result.y.x;
+        *sin_out = sign * result.y.x;
     }
 }
 
@@ -106,10 +134,9 @@ double cordic_circular_tan(double angle_rad, int iterations) {
 
     double s, c;
 
-    /*
-     * Divisão por octantes (Cody & Waite / FDLIBM):
-     * Se theta > pi/4, avalia-se alpha = (pi/2 - theta) no primeiro octante [0, pi/4]
-     * e aplica-se a identidade da cotangente: tan(theta) = cot(alpha) = cos(alpha) / sin(alpha).
+    /* Para angulos acima de pi/4, calcula o complementar alpha = pi/2 - theta.
+     * Assim, o CORDIC trabalha em [0, pi/4] e a identidade tan(theta) =
+     * cos(alpha) / sin(alpha) fornece o valor da tangente original.
      */
     if (angle_rad > PI_4) {
         double alpha = PI_2 - angle_rad;

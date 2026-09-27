@@ -176,7 +176,7 @@ int main(void) {
     /* -------------------------------------------------------------------------
      * Saída 2: Arquivo CSV (.csv)
      * ------------------------------------------------------------------------- */
-    const char *csv_filename = "benchmark_results.csv";
+    const char *csv_filename = "tests/benchmark_results.csv";
     FILE *fp = fopen(csv_filename, "w");
     if (fp == NULL) {
         perror("Erro ao abrir benchmark_results.csv para gravacao");

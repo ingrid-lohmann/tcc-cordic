@@ -4,17 +4,16 @@
 #include <math.h>
 #include <float.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 #include "cordic_circular.h"
 #include "cordic_hyperbolic.h"
 #include "cordic_transcendental.h"
+#include "ieee_utils.h"
 
 #define CORDIC_ITERS 24
 
 static void test_edge_case(const char *category, const char *expr_name, double input, double cordic_res, double math_res) {
+    (void)category;
+
     double abs_err = fabs(cordic_res - math_res);
     double rel_err = (fabs(math_res) > 1e-15) ? (abs_err / fabs(math_res)) : abs_err;
     
@@ -45,7 +44,7 @@ int main(void) {
     printf("---------------------------------------------------------------------------------------------------------\n");
 
     /* 1.2 Proximidade de pi/2 para Tangente (Quase assíntota vertical) */
-    double near_pi2 = (M_PI / 2.0) - 1e-6;
+    double near_pi2 = (PI / 2.0) - 1e-6;
     test_edge_case("Assintota", "tan(pi/2 - 1e-6)", near_pi2, 
                    cordic_circular_tan(near_pi2, CORDIC_ITERS), tan(near_pi2));
 
@@ -66,7 +65,7 @@ int main(void) {
     /* -------------------------------------------------------------------------
      * 2. Varredura Fina Contínua do 1º Quadrante (Exportação para CSV)
      * ------------------------------------------------------------------------- */
-    const char *csv_file = "stress_test_domain.csv";
+    const char *csv_file = "tests/stress_test_domain.csv";
     FILE *fp = fopen(csv_file, "w");
     if (fp == NULL) {
         perror("Erro ao criar stress_test_domain.csv");
@@ -79,7 +78,7 @@ int main(void) {
     double max_err_sin = 0.0, max_err_cos = 0.0, max_err_tan = 0.0;
     double worst_angle_sin = 0.0, worst_angle_cos = 0.0;
 
-    for (double theta = 0.0; theta <= (M_PI / 2.0); theta += step) {
+    for (double theta = 0.0; theta <= (PI / 2.0); theta += step) {
         double s, c;
         cordic_circular_sin_cos(theta, &s, &c, CORDIC_ITERS);
         double ref_s = sin(theta);
@@ -104,7 +103,7 @@ int main(void) {
             max_err_cos = err_c;
             worst_angle_cos = theta;
         }
-        if (err_t > max_err_tan && theta < (M_PI / 2.0 - 0.05)) { /* ignora singularidade exata de pi/2 */
+        if (err_t > max_err_tan && theta < (PI / 2.0 - 0.05)) { /* ignora singularidade exata de pi/2 */
             max_err_tan = err_t;
         }
 
@@ -116,7 +115,7 @@ int main(void) {
     fclose(fp);
 
     printf("--- [2] Resumo da Varredura Continua [0, pi/2] ---\n");
-    printf("Total de pontos analisados: %d\n", (int)((M_PI / 2.0) / step) + 1);
+    printf("Total de pontos analisados: %d\n", (int)((PI / 2.0) / step) + 1);
     printf("Pior Erro Absoluto Seno:    %1.2e (em theta = %.4f rad)\n", max_err_sin, worst_angle_sin);
     printf("Pior Erro Absoluto Cosseno: %1.2e (em theta = %.4f rad)\n", max_err_cos, worst_angle_cos);
     printf("Pior Erro Absoluto Tangente (fora do polo): %1.2e\n", max_err_tan);

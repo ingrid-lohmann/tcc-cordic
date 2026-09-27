@@ -3,26 +3,14 @@
 #include "cordic_hyperbolic.h"
 #include "cordic_lut.h"
 
-/* Armazena o valor de ln(2) computado dinamicamente via CORDIC */
-static double cached_ln2 = 0.0;
-
-/*
- * Calcula ln(2) a partir da identidade
- * ln(2) = 2 * atanh((2 - 1) / (2 + 1)) = 2 * atanh(1/3).
- * Como 1/3 e menor que 0.8069, o argumento esta dentro da faixa de
- * convergencia usada pelo CORDIC hiperbolico e nao precisa ser reduzido.
+/* Calcula ln(2) pela identidade ln(2) = 2 * atanh(1/3). O argumento 1/3
+ * fica dentro da faixa de convergencia do CORDIC hiperbolico, sem reducao.
  */
 static double get_cordic_ln2(int iterations) {
-    if (cached_ln2 == 0.0) {
-        cached_ln2 = 2.0 * cordic_hyperbolic_atanh(1.0 / 3.0, iterations);
-    }
-    return cached_ln2;
+    return 2.0 * cordic_hyperbolic_atanh(1.0 / 3.0, iterations);
 }
-
-/*
- * Calcula e^x usando e^r = cosh(r) + sinh(r). Antes da chamada ao CORDIC,
- * x e separado em x = k * ln(2) + r. O resultado e entao reconstruido como
- * 2^k * e^r, mantendo r pequeno para favorecer a convergencia.
+/* Decompoe x em k * ln(2) + r para calcular e^r = cosh(r) + sinh(r).
+ * Depois, recupera e^x multiplicando e^r por 2^k.
  */
 double cordic_exp(double x, int iterations) {
     if (isnan(x)) return NAN;
@@ -41,13 +29,19 @@ double cordic_exp(double x, int iterations) {
     return ldexp(exp_r, k);
 }
 
-/*
- * Calcula o logaritmo pela identidade ln(x) = 2 * atanh((x - 1) / (x + 1)).
- * Para manter o argumento em uma faixa adequada, x e decomposto pela funcao
- * frexp como x = m * 2^exp_val, com m em [0.5, 1.0). Assim, o resultado e
- * obtido por ln(x) = ln(m) + exp_val * ln(2).
+/* Usa ln(x) = 2 * atanh((x - 1) / (x + 1)). A decomposicao feita por
+ * frexp, x = m * 2^exp_val com m em [0.5, 1.0), permite calcular ln(m) e
+ * recompor o resultado como ln(m) + exp_val * ln(2).
  */
 double cordic_ln(double x, int iterations) {
+    if (isnan(x)) return NAN;
+
+    if (x < 0.0) return NAN;
+
+    if (x == 0.0) return -INFINITY;
+    
+    if (isinf(x)) return INFINITY;
+
     if (x <= 0.0) {
         return (x == 0.0) ? -INFINITY : NAN; /* ln nao definido para x <= 0 */
     }
@@ -63,14 +57,12 @@ double cordic_ln(double x, int iterations) {
     return ln_m + (double)exp_val * ln2;
 }
 
-/*
- * A raiz quadrada usa a relacao hiperbolica entre x0 = x + 0.25 e
- * y0 = x - 0.25. A diferenca x0^2 - y0^2 e igual a x, portanto a
- * vetorizacao produz (1/K) * sqrt(x) em x. O produto por K_HYPERBOLIC
- * remove esse ganho.
+/* A raiz e calculada por vetorizacao hiperbolica. Com x0 = m + 0.25 e
+ * y0 = m - 0.25, vale x0^2 - y0^2 = m. A vetorizacao produz
+ * (1/K) * sqrt(m); a multiplicacao por K_HYPERBOLIC corrige esse ganho.
  *
- * Antes da vetorizacao, x e escrito na forma m * 4^k, com m em [0.5, 2.0).
- * O calculo e feito sobre m e o fator 4^k e aplicado ao final.
+ * Antes do calculo, x e escrito como m * 4^k, com m em [0.5, 2.0), para
+ * manter m em uma faixa adequada. O fator 4^k e aplicado ao resultado.
  */
 double cordic_sqrt(double x, int iterations) {
     if (x < 0.0) {

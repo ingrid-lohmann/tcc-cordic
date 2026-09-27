@@ -1,12 +1,3 @@
-# Makefile simples
-# all:
-#   gcc *.c -o main
-
-# run:
-#   ./main
-
-# ----------
-
 # 📁 Diretórios
 SRC_DIR = src
 BUILD_DIR = build
@@ -21,43 +12,90 @@ CFLAGS = -Wall -Wextra -Werror -std=c11 -I$(INC_DIR)
 LDFLAGS = -lm
 DEBUG_FLAGS = -g
 
-# 📦 Arquivos fonte e tabelas
+# 📦 Arquivos fonte (excluindo main.c para compilar com testes)
 SRCS = $(wildcard $(SRC_DIR)/*.c)
+CORE_SRCS = $(filter-out $(SRC_DIR)/main.c, $(SRCS))
+
+# 📐 Tabelas e gerador
 LUT_HEADER = $(INC_DIR)/cordic_lut.h
 TABLE_GEN_SRC = $(TOOLS_DIR)/build_cordic_table.c
 TABLE_GEN_BIN = $(BUILD_DIR)/table_generator
 
-# 🎯 Nome do executável final unificado
+# 🎯 Binários
 TARGET = $(BUILD_DIR)/main
+EDGE_BIN = $(BUILD_DIR)/test_edge_cases
+STRESS_BIN = $(BUILD_DIR)/stress_test
+CONV_BIN = $(BUILD_DIR)/cordic_convergence
+BENCH_BIN = $(BUILD_DIR)/benchmark_latency
 
-# 🔄 Regra padrão (Gera a tabela primeiro, depois compila o pacote)
+# 🔄 Regra padrão
 all: $(LUT_HEADER) $(TARGET)
 
-# 📐 Regra para gerar o arquivo de tabelas automaticamente
+# 📐 Gerador de tabelas
 $(LUT_HEADER): $(TABLE_GEN_SRC)
 	@mkdir -p $(BUILD_DIR)
 	@echo "--- Compilando e executando o gerador de tabelas ---"
 	$(CC) $(TABLE_GEN_SRC) -o $(TABLE_GEN_BIN) $(LDFLAGS)
 	./$(TABLE_GEN_BIN)
 
-# 🔨 Regra de compilação unificada (junta todos os .c de uma vez)
+# 🔨 Executável principal
 $(TARGET): $(SRCS) $(LUT_HEADER)
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET) $(LDFLAGS)
 
-# ▶️ Rodar o executável principal diretamente
+# ▶️ Executar main
 run: all
 	@echo "--- Executando $(TARGET) ---"
 	./$(TARGET)
 
-# 🧪 Testes
+# 🧪 Regras de compilação dos binários de teste
+$(EDGE_BIN): $(CORE_SRCS) $(TEST_DIR)/test_edge_cases.c $(LUT_HEADER)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CORE_SRCS) $(TEST_DIR)/test_edge_cases.c -o $(EDGE_BIN) $(LDFLAGS)
+
+$(STRESS_BIN): $(CORE_SRCS) $(TEST_DIR)/stress_test.c $(LUT_HEADER)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CORE_SRCS) $(TEST_DIR)/stress_test.c -o $(STRESS_BIN) $(LDFLAGS)
+
+$(CONV_BIN): $(CORE_SRCS) $(TEST_DIR)/cordic_convergence.c $(LUT_HEADER)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CORE_SRCS) $(TEST_DIR)/cordic_convergence.c -o $(CONV_BIN) $(LDFLAGS)
+
+$(BENCH_BIN): $(CORE_SRCS) $(TEST_DIR)/benchmark_latency.c $(LUT_HEADER)
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CORE_SRCS) $(TEST_DIR)/benchmark_latency.c -o $(BENCH_BIN) $(LDFLAGS)
+
+# 🎯 Compilar todos os testes de uma vez
+tests: $(EDGE_BIN) $(STRESS_BIN) $(CONV_BIN) $(BENCH_BIN)
+
+# ▶️ Alvos para execução individual
+edge: $(EDGE_BIN)
+	@echo "--- Executando Testes de Casos de Borda ---"
+	./$(EDGE_BIN)
+
+stress: $(STRESS_BIN)
+	@echo "--- Executando Teste de Estresse ---"
+	./$(STRESS_BIN)
+
+convergence: $(CONV_BIN)
+	@echo "--- Executando Teste de Convergência ---"
+	./$(CONV_BIN)
+
+bench: $(BENCH_BIN)
+	@echo "--- Executando Benchmark de Latência ---"
+	./$(BENCH_BIN)
+
+# ▶️ Executa toda a bateria experimental sequencialmente
+run-all-tests: edge stress convergence bench
+
+# 🧪 Testes via Unity (caso use a suíte completa)
 test: $(LUT_HEADER)
 	$(CC) $(CFLAGS) -DTEST \
-	$(filter-out $(SRC_DIR)/main.c, $(SRC_DIR)/*.c) \
-	$(TEST_DIR)/test_*.c \
+	$(CORE_SRCS) \
+	$(wildcard $(TEST_DIR)/test_*.c) \
 	$(UNITY_DIR)/unity.c \
-	-o test_runner $(LDFLAGS)
-	./test_runner
+	-o $(BUILD_DIR)/test_runner $(LDFLAGS)
+	./$(BUILD_DIR)/test_runner
 
 # 🐞 Debug
 debug: CFLAGS += $(DEBUG_FLAGS)
@@ -66,7 +104,8 @@ debug: clean all
 # 🧹 Limpeza
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f test_runner
 
 # 🔁 Rebuild
 re: clean all
+
+.PHONY: all run tests edge stress convergence bench run-all-tests test debug clean re

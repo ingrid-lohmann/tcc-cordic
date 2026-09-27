@@ -56,14 +56,11 @@ CordicVector cordic_hyperbolic_rotate(CordicVector v, int iterations) {
 }
 
 /*
- * Na vetorizacao hiperbolica, as iteracoes reduzem y ate que ele se aproxime
- * de zero. O acumulador z converge para z_0 + atanh(y_0 / x_0), e x passa a
- * representar (1/K) * sqrt(x_0^2 - y_0^2).
+ * A vetorizacao hiperbolica ajusta o vetor ate que y se aproxime de zero. O
+ * acumulador z converge para z_0 + atanh(y_0 / x_0), e x passa a representar
+ * (1/K) * sqrt(x_0^2 - y_0^2).
  *
- * O CORDIC hiperbolico precisa repetir algumas iteracoes para manter a
- * convergencia. Neste caso, as iteracoes i = 4 e i = 13 sao executadas duas
- * vezes, de acordo com o criterio i = 3k + 1. Outra sequencia de repeticao
- * pode ser usada a partir de i_j = (3^(j+1) - 1) / 2, para j > 1.
+ * Para manter a convergencia, as iteracoes i = 4 e i = 13 sao repetidas.
  */
 CordicVector cordic_hyperbolic_vector(CordicVector v, int iterations) {
     for (int i = 1; i <= iterations; i++) {
