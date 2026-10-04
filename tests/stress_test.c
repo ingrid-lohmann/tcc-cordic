@@ -9,7 +9,7 @@
 #include "cordic_transcendental.h"
 #include "ieee_utils.h"
 
-#define CORDIC_ITERS 24
+#define CORDIC_ITERS CORDIC_ITERATIONS
 
 static void test_edge_case(const char *category, const char *expr_name, double input, double cordic_res, double math_res) {
     (void)category;
@@ -60,12 +60,71 @@ int main(void) {
         test_edge_case("Transicao Exp", "ln(x)", x, cordic_ln(x, CORDIC_ITERS), log(x));
         test_edge_case("Transicao Exp", "sqrt(x)", x, cordic_sqrt(x, CORDIC_ITERS), sqrt(x));
     }
+
+    printf("--- [2] Cobertura das Demais Funcoes CORDIC ---\n");
+
+    double circular_value = 0.5;
+    test_edge_case("Circular", "atan(x)", circular_value,
+                   cordic_circular_atan(circular_value, CORDIC_ITERS), atan(circular_value));
+
+    CordicVector circular_rotate_input = { .x.x = CORDIC_K_CIRCULAR, .y.x = 0.0, .z.x = PI_4 };
+    CordicVector circular_rotate_result = cordic_circular_rotate(circular_rotate_input, CORDIC_ITERS);
+    test_edge_case("Circular", "rotate.x", PI_4, circular_rotate_result.x.x, cos(PI_4));
+    test_edge_case("Circular", "rotate.y", PI_4, circular_rotate_result.y.x, sin(PI_4));
+    test_edge_case("Circular", "rotate.z", PI_4, circular_rotate_result.z.x, 0.0);
+
+    CordicVector circular_vector_input = { .x.x = 1.0, .y.x = circular_value, .z.x = 0.0 };
+    CordicVector circular_vector_result = cordic_circular_vector(circular_vector_input, CORDIC_ITERS);
+    test_edge_case("Circular", "vector.x", circular_value, circular_vector_result.x.x,
+                   sqrt(1.0 + circular_value * circular_value) / CORDIC_K_CIRCULAR);
+    test_edge_case("Circular", "vector.y", circular_value, circular_vector_result.y.x, 0.0);
+    test_edge_case("Circular", "vector.z", circular_value, circular_vector_result.z.x, atan(circular_value));
+
+    double hyperbolic_angle = 0.5;
+    double sinh_value, cosh_value;
+    cordic_hyperbolic_sinh_cosh(hyperbolic_angle, &sinh_value, &cosh_value, CORDIC_ITERS);
+    test_edge_case("Hiperbolica", "sinh(x)", hyperbolic_angle, sinh_value, sinh(hyperbolic_angle));
+    test_edge_case("Hiperbolica", "cosh(x)", hyperbolic_angle, cosh_value, cosh(hyperbolic_angle));
+    test_edge_case("Hiperbolica", "tanh(x)", hyperbolic_angle,
+                   cordic_hyperbolic_tanh(hyperbolic_angle, CORDIC_ITERS), tanh(hyperbolic_angle));
+
+    double hyperbolic_value = 1.0 / 3.0;
+    test_edge_case("Hiperbolica", "atanh(x)", hyperbolic_value,
+                   cordic_hyperbolic_atanh(hyperbolic_value, CORDIC_ITERS), atanh(hyperbolic_value));
+
+    CordicVector hyperbolic_rotate_input = {
+        .x.x = CORDIC_K_HYPERBOLIC, .y.x = 0.0, .z.x = hyperbolic_angle
+    };
+    CordicVector hyperbolic_rotate_result = cordic_hyperbolic_rotate(hyperbolic_rotate_input, CORDIC_ITERS);
+    test_edge_case("Hiperbolica", "rotate.x", hyperbolic_angle,
+                   hyperbolic_rotate_result.x.x, cosh(hyperbolic_angle));
+    test_edge_case("Hiperbolica", "rotate.y", hyperbolic_angle,
+                   hyperbolic_rotate_result.y.x, sinh(hyperbolic_angle));
+    test_edge_case("Hiperbolica", "rotate.z", hyperbolic_angle,
+                   hyperbolic_rotate_result.z.x, 0.0);
+
+    CordicVector hyperbolic_vector_input = { .x.x = 1.0, .y.x = hyperbolic_value, .z.x = 0.0 };
+    CordicVector hyperbolic_vector_result = cordic_hyperbolic_vector(hyperbolic_vector_input, CORDIC_ITERS);
+    test_edge_case("Hiperbolica", "vector.x", hyperbolic_value, hyperbolic_vector_result.x.x,
+                   sqrt(1.0 - hyperbolic_value * hyperbolic_value) / CORDIC_K_HYPERBOLIC);
+    test_edge_case("Hiperbolica", "vector.y", hyperbolic_value, hyperbolic_vector_result.y.x, 0.0);
+    test_edge_case("Hiperbolica", "vector.z", hyperbolic_value,
+                   hyperbolic_vector_result.z.x, atanh(hyperbolic_value));
+
+    double exp_input = 1.0;
+    test_edge_case("Transcendental", "exp(x)", exp_input,
+                   cordic_exp(exp_input, CORDIC_ITERS), exp(exp_input));
+    double pow_base = 1.5;
+    double pow_exponent = 1.25;
+    test_edge_case("Transcendental", "pow(x,y)", pow_base,
+                   cordic_pow(pow_base, pow_exponent, CORDIC_ITERS), pow(pow_base, pow_exponent));
     printf("=========================================================================================================\n\n");
 
     /* -------------------------------------------------------------------------
-     * 2. Varredura Fina Contínua do 1º Quadrante (Exportação para CSV)
+     * 3. Varredura Fina Contínua do 1º Quadrante (Exportação para CSV)
      * ------------------------------------------------------------------------- */
-    const char *csv_file = "tests/stress_test_domain.csv";
+    char csv_file[64];
+    snprintf(csv_file, sizeof(csv_file), "tests/stress_test_domain_%d.csv", CORDIC_ITERS);
     FILE *fp = fopen(csv_file, "w");
     if (fp == NULL) {
         perror("Erro ao criar stress_test_domain.csv");
@@ -114,7 +173,7 @@ int main(void) {
     fflush(fp);
     fclose(fp);
 
-    printf("--- [2] Resumo da Varredura Continua [0, pi/2] ---\n");
+    printf("--- [3] Resumo da Varredura Continua [0, pi/2] ---\n");
     printf("Total de pontos analisados: %d\n", (int)((PI / 2.0) / step) + 1);
     printf("Pior Erro Absoluto Seno:    %1.2e (em theta = %.4f rad)\n", max_err_sin, worst_angle_sin);
     printf("Pior Erro Absoluto Cosseno: %1.2e (em theta = %.4f rad)\n", max_err_cos, worst_angle_cos);

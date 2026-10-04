@@ -6,7 +6,7 @@
 #include "cordic_hyperbolic.h"
 #include "cordic_transcendental.h"
 
-#define TEST_ITERATIONS 24
+#define TEST_ITERATIONS CORDIC_ITERATIONS
 #define EPSILON 1e-7
 
 static int total_tests = 0;
@@ -57,8 +57,12 @@ void assert_isneginf(const char *category, const char *name, double actual) {
 }
 
 int main(void) {
-    f_md = fopen("tests/edge_cases_report.md", "w");
-    f_csv = fopen("tests/edge_cases_results.csv", "w");
+    char md_filename[64];
+    char csv_filename[64];
+    snprintf(md_filename, sizeof(md_filename), "tests/edge_cases_report_%d.md", TEST_ITERATIONS);
+    snprintf(csv_filename, sizeof(csv_filename), "tests/edge_cases_results_%d.csv", TEST_ITERATIONS);
+    f_md = fopen(md_filename, "w");
+    f_csv = fopen(csv_filename, "w");
 
     if (f_md) {
         fprintf(f_md, "# Relatório de Casos de Borda e Conformidade IEEE 754\n\n");
@@ -111,10 +115,61 @@ int main(void) {
     assert_close("Simetria/Quadrante", "cordic_circular_sin(3*pi)", s, sin(3.0 * PI), EPSILON);
     assert_close("Simetria/Quadrante", "cordic_circular_cos(3*pi)", c, cos(3.0 * PI), EPSILON);
 
+    printf("\n5. FUNCOES RESTANTES E MOTORES PRIMITIVOS:\n");
+    double circular_value = 0.5;
+    assert_close("Circular", "cordic_circular_atan(0.5)",
+                 cordic_circular_atan(circular_value, TEST_ITERATIONS), atan(circular_value), EPSILON);
+
+    CordicVector circular_rotate_input = { .x.x = CORDIC_K_CIRCULAR, .y.x = 0.0, .z.x = PI_4 };
+    CordicVector circular_rotate_result = cordic_circular_rotate(circular_rotate_input, TEST_ITERATIONS);
+    assert_close("Motor Circular", "rotate.x", circular_rotate_result.x.x, cos(PI_4), EPSILON);
+    assert_close("Motor Circular", "rotate.y", circular_rotate_result.y.x, sin(PI_4), EPSILON);
+    assert_close("Motor Circular", "rotate.z", circular_rotate_result.z.x, 0.0, EPSILON);
+
+    CordicVector circular_vector_input = { .x.x = 1.0, .y.x = circular_value, .z.x = 0.0 };
+    CordicVector circular_vector_result = cordic_circular_vector(circular_vector_input, TEST_ITERATIONS);
+    assert_close("Motor Circular", "vector.x", circular_vector_result.x.x,
+                 sqrt(1.0 + circular_value * circular_value) / CORDIC_K_CIRCULAR, EPSILON);
+    assert_close("Motor Circular", "vector.y", circular_vector_result.y.x, 0.0, EPSILON);
+    assert_close("Motor Circular", "vector.z", circular_vector_result.z.x, atan(circular_value), EPSILON);
+
+    double hyperbolic_value = 0.5;
+    assert_close("Hiperbolica", "cordic_hyperbolic_tanh(0.5)",
+                 cordic_hyperbolic_tanh(hyperbolic_value, TEST_ITERATIONS), tanh(hyperbolic_value), EPSILON);
+    double atanh_value = 1.0 / 3.0;
+    assert_close("Hiperbolica", "cordic_hyperbolic_atanh(1/3)",
+                 cordic_hyperbolic_atanh(atanh_value, TEST_ITERATIONS), atanh(atanh_value), EPSILON);
+    assert_isnan("Dominio Invalido", "cordic_hyperbolic_atanh(1.0)",
+                 cordic_hyperbolic_atanh(1.0, TEST_ITERATIONS));
+
+    double sinh_value, cosh_value;
+    cordic_hyperbolic_sinh_cosh(hyperbolic_value, &sinh_value, &cosh_value, TEST_ITERATIONS);
+    CordicVector hyperbolic_rotate_input = {
+        .x.x = CORDIC_K_HYPERBOLIC, .y.x = 0.0, .z.x = hyperbolic_value
+    };
+    CordicVector hyperbolic_rotate_result = cordic_hyperbolic_rotate(hyperbolic_rotate_input, TEST_ITERATIONS);
+    assert_close("Motor Hiperbolico", "rotate.x", hyperbolic_rotate_result.x.x, cosh(hyperbolic_value), EPSILON);
+    assert_close("Motor Hiperbolico", "rotate.y", hyperbolic_rotate_result.y.x, sinh(hyperbolic_value), EPSILON);
+    assert_close("Motor Hiperbolico", "rotate.z", hyperbolic_rotate_result.z.x, 0.0, EPSILON);
+
+    CordicVector hyperbolic_vector_input = { .x.x = 1.0, .y.x = atanh_value, .z.x = 0.0 };
+    CordicVector hyperbolic_vector_result = cordic_hyperbolic_vector(hyperbolic_vector_input, TEST_ITERATIONS);
+    assert_close("Motor Hiperbolico", "vector.x", hyperbolic_vector_result.x.x,
+                 sqrt(1.0 - atanh_value * atanh_value) / CORDIC_K_HYPERBOLIC, EPSILON);
+    assert_close("Motor Hiperbolico", "vector.y", hyperbolic_vector_result.y.x, 0.0, EPSILON);
+    assert_close("Motor Hiperbolico", "vector.z", hyperbolic_vector_result.z.x, atanh(atanh_value), EPSILON);
+
+    double pow_base = 1.5;
+    double pow_exponent = 1.25;
+    assert_close("Transcendental", "cordic_pow(1.5, 1.25)",
+                 cordic_pow(pow_base, pow_exponent, TEST_ITERATIONS), pow(pow_base, pow_exponent), EPSILON);
+    assert_isnan("Dominio Invalido", "cordic_pow(-1.0, 2.0)",
+                 cordic_pow(-1.0, 2.0, TEST_ITERATIONS));
+
     printf("\n=================================================================\n");
     printf("RESUMO: %d/%d testes passaram (%.1f%%)\n", 
            passed_tests, total_tests, (float)passed_tests / total_tests * 100.0f);
-    printf("Arquivos gerados:\n  -> tests/edge_cases_report.md\n  -> tests/edge_cases_results.csv\n");
+    printf("Arquivos gerados:\n  -> %s\n  -> %s\n", md_filename, csv_filename);
     printf("=================================================================\n");
 
     if (f_md) {

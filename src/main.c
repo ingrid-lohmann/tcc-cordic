@@ -8,7 +8,7 @@
 #include "cordic_hyperbolic.h"
 #include "cordic_transcendental.h"
 
-#define DEFAULT_ITERATIONS 24
+#define DEFAULT_ITERATIONS CORDIC_ITERATIONS
 
 static void print_comparison(const char *func_name, double input, double cordic_val, double math_val) {
     double error = fabs(cordic_val - math_val);
