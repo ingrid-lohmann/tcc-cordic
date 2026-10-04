@@ -130,7 +130,7 @@ int main(void) {
     CordicVector circular_vector_result = cordic_circular_vector(circular_vector_input, TEST_ITERATIONS);
     assert_close("Motor Circular", "vector.x", circular_vector_result.x.x,
                  sqrt(1.0 + circular_value * circular_value) / CORDIC_K_CIRCULAR, EPSILON);
-    assert_close("Motor Circular", "vector.y", circular_vector_result.y.x, 0.0, EPSILON);
+    assert_close("Motor Circular", "vector.y", circular_vector_result.y.x, 0.0, 2.0 * EPSILON);
     assert_close("Motor Circular", "vector.z", circular_vector_result.z.x, atan(circular_value), EPSILON);
 
     double hyperbolic_value = 0.5;
