@@ -1,0 +1,37 @@
+\begin{table}[htbp]
+\centering
+\caption{Desempenho temporal e latência média das rotinas CORDIC frente à \texttt{math.h} ($10^6$ amostras)}}
+\label{tab:benchmark_results_32}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
+\hline
+Operação & Implementação & Tempo Total (s) & Latência (ns/op) & Ciclos/op & \textit{Slowdown} \\
+\hline
+Rotação Circular (\texttt{rotate}) & CORDIC & 0,5804 & 580,38 & 1419,30 & - \\
+Vetorização Circular (\texttt{vector}) & CORDIC & 0,5727 & 572,75 & 1400,61 & - \\
+Seno e Cosseno ($\sin + \cos$) & CORDIC & 0,5685 & 568,46 & 1390,13 & $29,02\times$ \\
+Seno e Cosseno ($\sin + \cos$) & \texttt{math.h} & 0,0196 & 19,59 & 47,91 & 1{,}00$\times$ (ref) \\
+Tangente ($\tan$) & CORDIC & 0,5817 & 581,69 & 1422,48 & $58,06\times$ \\
+Tangente ($\tan$) & \texttt{math.h} & 0,0100 & 10,02 & 24,50 & 1{,}00$\times$ (ref) \\
+Arco Tangente ($\arctan$) & CORDIC & 0,5476 & 547,60 & 1339,12 & $58,55\times$ \\
+Arco Tangente ($\arctan$) & \texttt{math.h} & 0,0094 & 9,35 & 22,87 & 1{,}00$\times$ (ref) \\
+Rotação Hiperbólica (\texttt{rotate}) & CORDIC & 0,7947 & 794,66 & 1943,28 & - \\
+Vetorização Hiperbólica (\texttt{vector}) & CORDIC & 0,6907 & 690,68 & 1689,01 & - \\
+Seno e Cosseno Hip. ($\sinh + \cosh$) & CORDIC & 0,7183 & 718,27 & 1756,48 & $16,67\times$ \\
+Seno e Cosseno Hip. ($\sinh + \cosh$) & \texttt{math.h} & 0,0431 & 43,10 & 105,39 & 1{,}00$\times$ (ref) \\
+Tangente Hiperbólica ($\tanh$) & CORDIC & 0,7881 & 788,13 & 1927,31 & $71,34\times$ \\
+Tangente Hiperbólica ($\tanh$) & \texttt{math.h} & 0,0110 & 11,05 & 27,02 & 1{,}00$\times$ (ref) \\
+Arco Tangente Hip. ($\mathrm{artanh}$) & CORDIC & 0,7132 & 713,19 & 1744,06 & $84,45\times$ \\
+Arco Tangente Hip. ($\mathrm{artanh}$) & \texttt{math.h} & 0,0084 & 8,44 & 20,65 & 1{,}00$\times$ (ref) \\
+Exponencial ($\exp$) & CORDIC & 1,4176 & 1417,56 & 3466,54 & $164,47\times$ \\
+Exponencial ($\exp$) & \texttt{math.h} & 0,0086 & 8,62 & 21,08 & 1{,}00$\times$ (ref) \\
+Logaritmo Natural ($\ln$) & CORDIC & 1,4040 & 1404,03 & 3433,44 & $281,69\times$ \\
+Logaritmo Natural ($\ln$) & \texttt{math.h} & 0,0050 & 4,98 & 12,19 & 1{,}00$\times$ (ref) \\
+Raiz Quadrada ($\sqrt{x}$) & CORDIC & 0,7222 & 722,20 & 1766,10 & $193,63\times$ \\
+Raiz Quadrada ($\sqrt{x}$) & \texttt{math.h} & 0,0037 & 3,73 & 9,12 & 1{,}00$\times$ (ref) \\
+Potenciação ($x^y$) & CORDIC & 2,8505 & 2850,54 & 6970,78 & $182,57\times$ \\
+Potenciação ($x^y$) & \texttt{math.h} & 0,0156 & 15,61 & 38,18 & 1{,}00$\times$ (ref) \\
+\hline
+\end{tabular}%
+}
+\end{table}
