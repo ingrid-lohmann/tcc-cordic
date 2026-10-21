@@ -1,0 +1,51 @@
+\begin{table}[htbp]
+\centering
+\caption{Resultados dos ensaios de conformidade e casos de borda IEEE 754 ($N = 32$, 38 cenários)}
+\label{tab:casos_borda_32}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
+\hline
+Categoria & Caso de Teste & Obtido & Esperado & Diferença & Status \\
+\hline
+Zero/Identidade & \texttt{cordic\_circular\_sin(0.0)} & $0{,}0$ & $0{,}0$ & $1,30 \times 10^{-10}$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_circular\_cos(0.0)} & 1 & 1 & $5,55 \times 10^{-16}$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_circular\_tan(0.0)} & $0{,}0$ & $0{,}0$ & $1,30 \times 10^{-10}$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_hyperbolic\_sinh(0.0)} & $0{,}0$ & $0{,}0$ & $1,64 \times 10^{-10}$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_hyperbolic\_cosh(0.0)} & 1 & 1 & $2,22 \times 10^{-16}$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_exp(0.0)} & 1 & 1 & $0{,}0$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_ln(1.0)} & $0{,}0$ & $0{,}0$ & $0{,}0$ & \texttt{PASS} \\
+Zero/Identidade & \texttt{cordic\_sqrt(0.0)} & $0{,}0$ & $0{,}0$ & $0{,}0$ & \texttt{PASS} \\
+Dominio Invalido & \texttt{cordic\_sqrt(-1.0)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Dominio Invalido & \texttt{cordic\_sqrt(-100.0)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Dominio Invalido & \texttt{cordic\_ln(-2.0)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Dominio Invalido & \texttt{cordic\_ln(0.0)} & $-\infty$ & $-\infty$ & $0{,}0$ & \texttt{PASS} \\
+Entrada Especial & \texttt{cordic\_circular\_sin(NAN)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Entrada Especial & \texttt{cordic\_circular\_cos(NAN)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Entrada Especial & \texttt{cordic\_sqrt(NAN)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Entrada Especial & \texttt{cordic\_ln(NAN)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Simetria/Quadrante & \texttt{cordic\_circular\_sin(-pi/4)} & -0,707107 & -0,707107 & $6,82 \times 10^{-11}$ & \texttt{PASS} \\
+Simetria/Quadrante & \texttt{cordic\_circular\_cos(-pi/4)} & 0,707107 & 0,707107 & $6,82 \times 10^{-11}$ & \texttt{PASS} \\
+Simetria/Quadrante & \texttt{cordic\_circular\_sin(3*pi)} & $0{,}0$ & $0{,}0$ & $1,30 \times 10^{-10}$ & \texttt{PASS} \\
+Simetria/Quadrante & \texttt{cordic\_circular\_cos(3*pi)} & -1 & -1 & $5,55 \times 10^{-16}$ & \texttt{PASS} \\
+Circular & \texttt{cordic\_circular\_atan(0.5)} & 0,463648 & 0,463648 & $2,04 \times 10^{-10}$ & \texttt{PASS} \\
+Motor Circular & \texttt{rotate.x} & 0,707107 & 0,707107 & $6,82 \times 10^{-11}$ & \texttt{PASS} \\
+Motor Circular & \texttt{rotate.y} & 0,707107 & 0,707107 & $6,82 \times 10^{-11}$ & \texttt{PASS} \\
+Motor Circular & \texttt{rotate.z} & $0{,}0$ & $0{,}0$ & $9,65 \times 10^{-11}$ & \texttt{PASS} \\
+Motor Circular & \texttt{vector.x} & 1,841134 & 1,841134 & $8,88 \times 10^{-16}$ & \texttt{PASS} \\
+Motor Circular & \texttt{vector.y} & $0{,}0$ & $0{,}0$ & $3,75 \times 10^{-10}$ & \texttt{PASS} \\
+Motor Circular & \texttt{vector.z} & 0,463648 & 0,463648 & $2,04 \times 10^{-10}$ & \texttt{PASS} \\
+Hiperbolica & \texttt{cordic\_hyperbolic\_tanh(0.5)} & 0,462117 & 0,462117 & $1,28 \times 10^{-10}$ & \texttt{PASS} \\
+Hiperbolica & \texttt{cordic\_hyperbolic\_atanh(1/3)} & 0,346574 & 0,346574 & $1,57 \times 10^{-10}$ & \texttt{PASS} \\
+Dominio Invalido & \texttt{cordic\_hyperbolic\_atanh(1.0)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+Motor Hiperbolico & \texttt{rotate.x} & 1,127626 & 1,127626 & $8,49 \times 10^{-11}$ & \texttt{PASS} \\
+Motor Hiperbolico & \texttt{rotate.y} & 0,521095 & 0,521095 & $1,84 \times 10^{-10}$ & \texttt{PASS} \\
+Motor Hiperbolico & \texttt{rotate.z} & $0{,}0$ & $0{,}0$ & $1,63 \times 10^{-10}$ & \texttt{PASS} \\
+Motor Hiperbolico & \texttt{vector.x} & 0,780796 & 0,780796 & $0{,}0$ & \texttt{PASS} \\
+Motor Hiperbolico & \texttt{vector.y} & $0{,}0$ & $0{,}0$ & $1,22 \times 10^{-10}$ & \texttt{PASS} \\
+Motor Hiperbolico & \texttt{vector.z} & 0,346574 & 0,346574 & $1,57 \times 10^{-10}$ & \texttt{PASS} \\
+Transcendental & \texttt{cordic\_pow(1.5, 1.25)} & 1,660023 & 1,660023 & $4,24 \times 10^{-10}$ & \texttt{PASS} \\
+Dominio Invalido & \texttt{cordic\_pow(-1.0, 2.0)} & \texttt{NaN} & \texttt{NaN} & $0{,}0$ & \texttt{PASS} \\
+\hline
+\end{tabular}%
+}
+\end{table}
